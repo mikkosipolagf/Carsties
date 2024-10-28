@@ -1,20 +1,18 @@
-using AutoMapper;
+﻿using AutoMapper;
 using Contracts;
 using MassTransit;
 using MongoDB.Entities;
-using SearchService.Models;
 
-namespace SearchService.Consumers;
+namespace SearchService;
 
 public class AuctionUpdatedConsumer : IConsumer<AuctionUpdated>
 {
-    private IMapper _mapper;
+    private readonly IMapper _mapper;
 
     public AuctionUpdatedConsumer(IMapper mapper)
     {
         _mapper = mapper;
     }
-
     public async Task Consume(ConsumeContext<AuctionUpdated> context)
     {
         Console.WriteLine("--> Consuming auction updated: " + context.Message.Id);
@@ -29,11 +27,11 @@ public class AuctionUpdatedConsumer : IConsumer<AuctionUpdated>
                 x.Make,
                 x.Model,
                 x.Year,
-                x.Mileage,
+                x.Mileage
             }, item)
             .ExecuteAsync();
 
-        if (!result.IsAcknowledged)
-            throw new MessageException(typeof(AuctionUpdated), "Failed to update item");
+        if (!result.IsAcknowledged) 
+            throw new MessageException(typeof(AuctionUpdated), "Problem updating mongodb");
     }
 }

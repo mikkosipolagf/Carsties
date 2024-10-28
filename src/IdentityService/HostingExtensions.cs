@@ -1,7 +1,6 @@
 using Duende.IdentityServer;
 using IdentityService.Data;
 using IdentityService.Models;
-using IdentityService.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -28,7 +27,11 @@ internal static class HostingExtensions
                 options.Events.RaiseInformationEvents = true;
                 options.Events.RaiseFailureEvents = true;
                 options.Events.RaiseSuccessEvents = true;
-                options.IssuerUri = builder.Configuration["IssuerUri"];
+
+                if (builder.Environment.IsEnvironment("Docker"))
+                {
+                    options.IssuerUri = "identity-svc";
+                }
 
                 // see https://docs.duendesoftware.com/identityserver/v6/fundamentals/resources/
                 // options.EmitStaticAudienceClaim = true;
@@ -37,22 +40,22 @@ internal static class HostingExtensions
             .AddInMemoryApiScopes(Config.ApiScopes)
             .AddInMemoryClients(Config.Clients)
             .AddAspNetIdentity<ApplicationUser>()
-            .AddProfileService<CustomProfilesService>();
+            .AddProfileService<CustomProfileService>();
 
-        builder.Services.ConfigureApplicationCookie(options =>
+        builder.Services.ConfigureApplicationCookie(options => 
         {
             options.Cookie.SameSite = SameSiteMode.Lax;
         });
-
+        
         builder.Services.AddAuthentication();
 
         return builder.Build();
     }
-
+    
     public static WebApplication ConfigurePipeline(this WebApplication app)
-    {
+    { 
         app.UseSerilogRequestLogging();
-
+    
         if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
@@ -62,7 +65,7 @@ internal static class HostingExtensions
         app.UseRouting();
         app.UseIdentityServer();
         app.UseAuthorization();
-
+        
         app.MapRazorPages()
             .RequireAuthorization();
 

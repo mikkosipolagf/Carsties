@@ -25,15 +25,15 @@ public static class Config
                 ClientId = "postman",
                 ClientName = "Postman",
                 AllowedScopes = {"openid", "profile", "auctionApp"},
-                RedirectUris = {"https://www.getpostman.com/oath2/callback"},
-                ClientSecrets = new [] {new Secret("NotASecret".Sha256())},
+                RedirectUris = {"https://www.getpostman.com/oauth2/callback"},
+                ClientSecrets = new[] {new Secret("NotASecret".Sha256())},
                 AllowedGrantTypes = {GrantType.ResourceOwnerPassword}
             },
             new Client
             {
                 ClientId = "nextApp",
                 ClientName = "nextApp",
-                ClientSecrets = new [] {new Secret("secret".Sha256())},
+                ClientSecrets = {new Secret("secret".Sha256())},
                 AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
                 RequirePkce = false,
                 RedirectUris = {"http://localhost:3000/api/auth/callback/id-server"},

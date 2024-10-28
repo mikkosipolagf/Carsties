@@ -1,10 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using MongoDB.Entities;
-using SearchService.Models;
-using SearchService.RequestHelpers;
-using ZstdSharp.Unsafe;
 
-namespace SearchService.Controllers;
+namespace SearchService;
 
 [ApiController]
 [Route("api/search")]
@@ -15,9 +12,7 @@ public class SearchController : ControllerBase
     {
         var query = DB.PagedSearch<Item, Item>();
 
-        query.Sort(x => x.Ascending(a => a.Make));
-
-        if (!String.IsNullOrEmpty(searchParams.SearchTerm))
+        if (!string.IsNullOrEmpty(searchParams.SearchTerm))
         {
             query.Match(Search.Full, searchParams.SearchTerm).SortByTextScore();
         }
@@ -25,7 +20,7 @@ public class SearchController : ControllerBase
         query = searchParams.OrderBy switch
         {
             "make" => query.Sort(x => x.Ascending(a => a.Make)),
-            "new" => query.Sort(x => x.Ascending(a => a.CreatedAt)),
+            "new" => query.Sort(x => x.Descending(a => a.CreatedAt)),
             _ => query.Sort(x => x.Ascending(a => a.AuctionEnd))
         };
 
@@ -44,7 +39,7 @@ public class SearchController : ControllerBase
 
         if (!string.IsNullOrEmpty(searchParams.Winner))
         {
-            query.Match(x => x.Seller == searchParams.Winner);
+            query.Match(x => x.Winner == searchParams.Winner);
         }
 
         query.PageNumber(searchParams.PageNumber);

@@ -1,14 +1,13 @@
-using System;
-using AuctionService.Data;
+﻿using AuctionService.Data;
 using AuctionService.Entities;
 using Contracts;
 using MassTransit;
 
-namespace AuctionService.Consumers;
+namespace AuctionService;
 
 public class AuctionFinishedConsumer : IConsumer<AuctionFinished>
 {
-    private AuctionDbContext _dbContext;
+    private readonly AuctionDbContext _dbContext;
 
     public AuctionFinishedConsumer(AuctionDbContext dbContext)
     {

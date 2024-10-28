@@ -1,11 +1,18 @@
-using System;
-using MongoDB.Entities;
-using SearchService.Models;
+﻿using MongoDB.Entities;
 
-namespace SearchService.Services;
+namespace SearchService;
 
-public class AuctionSvcHttpClient(HttpClient httpClient, IConfiguration config)
+public class AuctionSvcHttpClient
 {
+    private readonly HttpClient _httpClient;
+    private readonly IConfiguration _config;
+
+    public AuctionSvcHttpClient(HttpClient httpClient, IConfiguration config)
+    {
+        _httpClient = httpClient;
+        _config = config;
+    }
+
     public async Task<List<Item>> GetItemsForSearchDb()
     {
         var lastUpdated = await DB.Find<Item, string>()
@@ -13,18 +20,7 @@ public class AuctionSvcHttpClient(HttpClient httpClient, IConfiguration config)
             .Project(x => x.UpdatedAt.ToString())
             .ExecuteFirstAsync();
 
-        var auctionURL = config["AuctionServiceUrl"]
-            ?? throw new ArgumentNullException("Cannot get auction address");
-
-        var url = auctionURL + "/api/auctions";
-
-        if (!string.IsNullOrEmpty(lastUpdated))
-        {
-            url += $"?date={lastUpdated}";
-        }
-
-        var items = await httpClient.GetFromJsonAsync<List<Item>>(url);
-
-        return items ?? [];
+        return await _httpClient.GetFromJsonAsync<List<Item>>(_config["AuctionServiceUrl"] 
+            + "/api/auctions?date=" + lastUpdated);
     }
 }

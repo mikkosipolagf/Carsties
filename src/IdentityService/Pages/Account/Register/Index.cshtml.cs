@@ -10,16 +10,26 @@ namespace IdentityService.Pages.Register
 {
     [SecurityHeaders]
     [AllowAnonymous]
-    public class Index(UserManager<ApplicationUser> userManager) : PageModel
+    public class Index : PageModel
     {
-        [BindProperty] public RegisterViewModel Input { get; set; } = new();
-        [BindProperty] public bool RegisterSuccess { get; set; }
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public IActionResult OnGet(string? returnUrl)
+        public Index(UserManager<ApplicationUser> userManager)
+        {
+            _userManager = userManager;
+        }
+
+        [BindProperty]
+        public RegisterViewModel Input { get; set; }
+
+        [BindProperty]
+        public bool RegisterSuccess { get; set; }
+
+        public IActionResult OnGet(string returnUrl)
         {
             Input = new RegisterViewModel
             {
-                ReturnUrl = returnUrl
+                ReturnUrl = returnUrl,
             };
 
             return Page();
@@ -38,11 +48,11 @@ namespace IdentityService.Pages.Register
                     EmailConfirmed = true
                 };
 
-                var result = await userManager.CreateAsync(user, Input.Password);
+                var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
                 {
-                    await userManager.AddClaimsAsync(user, new Claim[]
+                    await _userManager.AddClaimsAsync(user, new Claim[]
                     {
                         new Claim(JwtClaimTypes.Name, Input.FullName)
                     });
