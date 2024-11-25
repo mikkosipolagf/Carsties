@@ -1,6 +1,6 @@
 "use server";
 
-import { Auction, PagedResult } from "@/types";
+import { Auction, Bid, PagedResult } from "@/types";
 import { fetchWrapper } from "@/lib/fetchWrapper";
 import { FieldValues } from "react-hook-form";
 import { revalidatePath } from "next/cache";
@@ -9,7 +9,7 @@ export async function getData(query: string): Promise<PagedResult<Auction>> {
   return await fetchWrapper.get(`search${query}`);
 }
 
-async function updateAuctionTest() {
+export async function updateAuctionTest() {
   const data = {
     mileage: Math.floor(Math.random() * 100000) + 1,
   };
@@ -37,4 +37,14 @@ export async function updateAuction(data: FieldValues, id: string) {
 export async function deleteAuction(id: string) {
   return await fetchWrapper.del(`auctions/${id}`);
 }
-export default updateAuctionTest;
+
+export async function getBidsForAuction(id: string): Promise<Bid[]> {
+  return await fetchWrapper.get(`bids/${id}`);
+}
+
+export async function placeBidForAuction(auctionId: string, amount: number) {
+  return await fetchWrapper.post(
+    `bids?auctionId=${auctionId}&amount=${amount}`,
+    {}
+  );
+}
